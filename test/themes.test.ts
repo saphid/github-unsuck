@@ -65,7 +65,7 @@ test('custom links roundtrip complete palettes, labels and original GitHub query
 });
 
 test('named and imported themes recolor actual PNG redirects and crawler OG images', async () => {
-  for (const theme of [themeTools.resolve('dracula'), themeTools.importTheme('{"colors":{"editor.background":"#123456","editor.foreground":"#ffffff"}}')]) {
+  for (const theme of [...themeTools.presets.filter(theme => theme.id !== 'light'), themeTools.importTheme('{"colors":{"editor.background":"#123456","editor.foreground":"#ffffff"}}')]) {
     const url = new URL('/image', 'https://wrapper.test');
     url.search = themeTools.parameters(theme).toString();
     url.searchParams.set('url', 'https://github.com/owner/repo?tab=readme#readme');

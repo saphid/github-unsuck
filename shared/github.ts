@@ -20,6 +20,15 @@ export function githubUrl(input: string): URL {
   return url;
 }
 
+export function githubPathTarget(wrapper: URL): URL {
+  const target = githubUrl(`https://github.com${wrapper.pathname}`);
+  const query = new URLSearchParams(wrapper.search);
+  ["theme", "preview", "palette", "name"].forEach(key => query.delete(key));
+  target.search = query.toString();
+  target.hash = wrapper.hash;
+  return target;
+}
+
 export function themeParam(value: string | null): Theme {
   if (!value) return "dark";
   try { themeTools.resolve(value); return value; }

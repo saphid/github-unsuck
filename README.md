@@ -74,7 +74,8 @@ Private repository credentials and cookies are never forwarded.
 
 Open [/themes](https://github-unsuck.lakebed.app/themes) from the builder or
 extension. Browse theme families, filter dark/light appearances, and choose
-GitHub, VS Code Dark+/Light+, Catppuccin, Dracula, Nord, One Dark Pro, or Solarized.
+GitHub, T3 Code Dark/Light, T3 Chat Dark/Light, VS Code Dark+/Light+,
+Catppuccin, Dracula, Nord, One Dark Pro, Solarized, or Cursed Hotdog.
 The palette preview and share URL update immediately; **Load GitHub card** shows
 the actual recolored image for your repository, issue, or pull request.
 
@@ -96,7 +97,12 @@ inside the encoded `url` value. Importing does not upload or fetch a theme file.
 
 The family/variant gallery and workbench-color import approach are inspired by
 [T3 Code](https://github.com/pingdotgg/t3code) (MIT); this service implements its
-own smaller palette and parser without copying T3 Code source or dependencies.
+own smaller palette and parser without T3 Code's application code or dependencies.
+The T3 Code and T3 Chat presets map `canvas`, `text`, `accent`, and `sidebar`
+from its [upstream theme definitions](https://github.com/pingdotgg/t3code/blob/8a84e9426d26bb50de24a8d36c262a851a3befd2/packages/shared/src/themePalettes.ts).
+T3 Chat's OKLCH colors are converted to six-digit sRGB for the image renderer.
+Cursed Hotdog (`theme=hotdog`) uses the classic Windows Hot Dog Stand palette:
+red background, yellow text and panels, and black accents.
 
 | Parameter | Preview image |
 | --- | --- |
@@ -156,9 +162,14 @@ npx lakebed inspect https://YOUR-APP.lakebed.app
 
 Lakebed 0.0.41 reserves `/` for its client shell and matches endpoint paths
 exactly. The v1 URL format is `/u?url=<encoded-GitHub-URL>&theme=dark`, served
-without crawler JavaScript. Normal GitHub path routing needs a proxy rewrite or
-future wildcard endpoint support. Never redirect these paths to GitHub before
-serving the wrapper metadata, or the unfurl will stay white.
+without crawler JavaScript. The registered alias
+[`/pingdotgg/t3code/pull/29809`](https://github-unsuck.lakebed.app/pingdotgg/t3code/pull/29809)
+also serves dark GitHub metadata and forwards browser visitors to the original PR.
+Add other crawler-facing aliases in `shared/hosted-paths.ts` and redeploy.
+Other GitHub paths forward browser visitors through Lakebed's JavaScript shell;
+that shell has no Open Graph metadata, so use `/u?url=...` for arbitrary shared links.
+Generic server path routing needs a proxy rewrite or future wildcard endpoint
+support. Redirecting crawlers directly to GitHub would keep their unfurls white.
 
 The intended hostname is **github.unsuck.dev**. This runner currently rejects
 custom domains as unconfigured. Lakebed also documents a zero custom-domain
@@ -201,9 +212,10 @@ npm run build
 
 Tests cover URL validation, redirect restrictions, metadata escaping, upstream
 errors, bounded responses, explicit and automatic themes, query preservation,
-PNG redirect URLs, and crawler-facing tags. There are 26 unit tests, including JSONC imports, alpha/contrast handling, palette
-URL roundtrips, PNG/OG theme output, extension URL handling, theme capture,
-clipboard errors, offscreen messaging, and concurrent clipboard actions.
+PNG redirect URLs, and crawler-facing tags. There are 28 unit tests, including JSONC imports, alpha/contrast handling, palette
+URL roundtrips, PNG/OG theme output for every preset, extension URL handling, theme capture,
+clipboard errors, offscreen messaging, concurrent clipboard actions, and literal
+Lakebed path aliases with dark metadata, HTTPS canonical URLs, and GitHub forwarding.
 Endpoint responses cache successful metadata for ten minutes; errors are not cached. No persistent state is used.
 Chat apps have their own caches; changing `theme` creates a distinct shared URL.
 GitHub and Lakebed rate limits still apply. Health confirms the app is running;

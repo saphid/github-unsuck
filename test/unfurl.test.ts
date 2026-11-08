@@ -61,12 +61,12 @@ test("preview mode stays on page; theme auto varies correctly and uses light hin
   assert.match(fallback.body, /og:image" content="https:\/\/wsrv.nl\//);
 });
 
-test("query and future path URLs share behavior; original query survives", async () => {
+test("query and path URLs share behavior; original query survives", async () => {
   let requested = "";
   const fetcher = (async (url: URL) => { requested = url.href; return mockFetch(url); }) as typeof fetch;
-  const result = await handleRequest(new URL("https://github.unsuck.dev/owner/repo/pull/42?theme=light&diff=split"), new Headers(), fetcher, true);
+  const result = await handleRequest(new URL("https://github.unsuck.dev/owner/repo/pull/42?theme=light&diff=split&url=original"), new Headers(), fetcher, true);
   assert.equal(result.status, 200);
-  assert.equal(requested, "https://github.com/owner/repo/pull/42?diff=split");
+  assert.equal(requested, "https://github.com/owner/repo/pull/42?diff=split&url=original");
   assert.match(result.body, /og:image" content="https:\/\/opengraph.githubassets.com\//);
 });
 

@@ -1,6 +1,6 @@
 import { themeTools } from "./themes.ts";
 import { themePageContent, themePageScript, themePageStyle } from "./theme-page.ts";
-import { escapeHtml as e, githubUrl, HttpError, imageUrl, loadMetadata } from "./github.ts";
+import { escapeHtml as e, githubPathTarget, githubUrl, HttpError, imageUrl, loadMetadata } from "./github.ts";
 
 export type AppResponse = { status: number; headers: Record<string, string>; body: string };
 const baseHeaders = {
@@ -45,13 +45,8 @@ export async function handleRequest(url: URL, headers: Pick<Headers, "get"> = ne
     if (url.pathname === "/themes") return { status: 200, headers: { ...baseHeaders, "Cache-Control": "public, max-age=300" }, body: shell("Themes · GitHub / Unsuck", themePageContent(), `<style>${themePageStyle}</style>`, themePageScript(), "theme-page") };
     if ((url.pathname === "/make" || url.pathname === "/") && !url.searchParams.get("url")) return home();
     const imageRequest = url.pathname === "/image";
-    let input = url.searchParams.get("url");
-    if (!input && prettyPaths && url.pathname !== "/" && !imageRequest) {
-      // Only wrapper controls are stripped; preserve other GitHub query parameters.
-      const query = new URLSearchParams(url.search);
-      ["theme", "preview", "palette", "name"].forEach(key => query.delete(key));
-      input = `https://github.com${url.pathname}${query.size ? `?${query}` : ""}`;
-    }
+    const pathRequest = prettyPaths && !["/", "/make", "/u", "/image"].includes(url.pathname);
+    const input = pathRequest ? githubPathTarget(url).href : url.searchParams.get("url");
     if (!input && (url.pathname === "/" || url.pathname === "/make")) return home();
     if (!input) throw new HttpError(400, "Provide a GitHub URL with ?url=https%3A%2F%2Fgithub.com%2Fowner%2Frepo.");
     const target = githubUrl(input);

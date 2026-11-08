@@ -1,6 +1,9 @@
 export const SERVICE_ORIGIN = "https://github-unsuck.lakebed.app";
 export const DEFAULT_THEME = "system";
 export const PRESET_THEMES = [
+  ["t3-code-dark", "T3 Code · Dark"], ["t3-code-light", "T3 Code · Light"],
+  ["t3-chat-dark", "T3 Chat · Dark"], ["t3-chat-light", "T3 Chat · Light"],
+  ["hotdog", "Cursed Hotdog · Hot Dog Stand"],
   ["vscode-dark", "VS Code · Dark+"], ["vscode-light", "VS Code · Light+"],
   ["catppuccin-mocha", "Catppuccin · Mocha"], ["catppuccin-latte", "Catppuccin · Latte"],
   ["dracula", "Dracula"], ["nord", "Nord"], ["one-dark-pro", "One Dark Pro"],

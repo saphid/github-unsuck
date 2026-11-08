@@ -14,6 +14,11 @@ link previews. Clicking the shared link opens the original GitHub page.
 
 Additional editor palettes:
 
+- T3 Code Dark: https://github-unsuck.lakebed.app/u?url=pingdotgg/t3code&theme=t3-code-dark
+- T3 Code Light: https://github-unsuck.lakebed.app/u?url=pingdotgg/t3code&theme=t3-code-light
+- T3 Chat Dark: https://github-unsuck.lakebed.app/u?url=pingdotgg/t3code&theme=t3-chat-dark
+- T3 Chat Light: https://github-unsuck.lakebed.app/u?url=pingdotgg/t3code&theme=t3-chat-light
+- Cursed Hotdog: https://github-unsuck.lakebed.app/u?url=saphid/github-unsuck&theme=hotdog
 - Nord: https://github-unsuck.lakebed.app/u?url=saphid/github-unsuck&theme=nord
 - Catppuccin Mocha: https://github-unsuck.lakebed.app/u?url=saphid/github-unsuck&theme=catppuccin-mocha
 - VS Code Dark+: https://github-unsuck.lakebed.app/u?url=saphid/github-unsuck&theme=vscode-dark

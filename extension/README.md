@@ -22,7 +22,7 @@ Chrome 116 or newer is required. No build is needed to load the source folder.
   current GitHub page directly. Change conflicts at `chrome://extensions/shortcuts`.
 - On another site, open the extension and paste a public GitHub URL or an
   `owner/repository` path.
-- Choose a named editor theme such as Dracula, Nord, or Catppuccin in the popup.
+- Choose a named theme such as T3 Code, T3 Chat, Cursed Hotdog, Dracula, Nord, or Catppuccin in the popup.
   The selection also applies to the right-click menu and shortcut.
 - **Explore themes + import from VS Code** opens the full theme gallery with
   your current GitHub link. Imported palettes are used by links created on that

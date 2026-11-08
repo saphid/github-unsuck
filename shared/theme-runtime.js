@@ -3,6 +3,12 @@ export function createThemeTools() {
   const presets = [
     { id: 'dark', family: 'GitHub', name: 'GitHub Dark', appearance: 'dark', colors: ['0d1117','e6edf3','79c0ff','161b22'] },
     { id: 'light', family: 'GitHub', name: 'GitHub Light', appearance: 'light', colors: ['ffffff','1f2328','0969da','f6f8fa'] },
+    // Upstream T3 Code canvas, text, accent, sidebar; OKLCH converted to sRGB.
+    { id: 't3-code-dark', family: 'T3 Code', name: 'T3 Code Dark', appearance: 'dark', colors: ['0a0a0a','f5f5f5','346bf1','000000'] },
+    { id: 't3-code-light', family: 'T3 Code', name: 'T3 Code Light', appearance: 'light', colors: ['fcfcfc','27272a','1b4ed8','fafafa'] },
+    { id: 't3-chat-dark', family: 'T3 Chat', name: 'T3 Chat Dark', appearance: 'dark', colors: ['1f1a24','f9f8fb','a3004c','171018'] },
+    { id: 't3-chat-light', family: 'T3 Chat', name: 'T3 Chat Light', appearance: 'light', colors: ['fdf7fd','501854','db2777','f2e1f4'] },
+    { id: 'hotdog', family: 'Hot Dog Stand', name: 'Cursed Hotdog', appearance: 'light', colors: ['ff0000','ffff00','000000','ffff00'] },
     { id: 'vscode-dark', family: 'Visual Studio Code', name: 'Dark+', appearance: 'dark', colors: ['1e1e1e','d4d4d4','569cd6','252526'] },
     { id: 'vscode-light', family: 'Visual Studio Code', name: 'Light+', appearance: 'light', colors: ['ffffff','333333','005fb8','f3f3f3'] },
     { id: 'catppuccin-mocha', family: 'Catppuccin', name: 'Mocha', appearance: 'dark', colors: ['1e1e2e','cdd6f4','cba6f7','313244'] },

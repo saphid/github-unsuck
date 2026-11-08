@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "GitHub / Unsuck",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Copy GitHub links with dark or light previews, from your toolbar or right-click menu.",
   "minimum_chrome_version": "116",
   "permissions": [
