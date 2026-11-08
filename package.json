@@ -1,0 +1,20 @@
+{
+  "name": "theme-unfurl",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node standalone.ts",
+    "dev": "lakebed dev --port 3918",
+    "build": "lakebed build",
+    "test": "node --test test/*.test.ts",
+    "deploy": "lakebed deploy",
+    "extension:zip": "python3 scripts/package-extension.py"
+  },
+  "devDependencies": {
+    "lakebed": "0.0.41"
+  }
+}

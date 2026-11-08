@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>GitHub / Unsuck</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <header><img src="icons/32.png" width="28" height="28" alt=""><span>GITHUB <span class="slash">/</span> UNSUCK</span></header>
+    <h1>A better link.<br>A darker preview.</h1>
+    <form id="link-form">
+      <label for="github-url">GitHub link</label>
+      <input id="github-url" type="text" placeholder="github.com/owner/repo" required spellcheck="false" autocomplete="off" aria-describedby="input-note">
+      <p id="input-note" class="note">Current page, or paste another public GitHub link.</p>
+      <label for="theme">Preview theme</label>
+      <select id="theme"><option value="system">Match my system</option><option value="dark">Dark</option><option value="light">Light</option></select>
+      <p id="theme-note" class="note">System captures your current theme. Chat apps use that image for everyone.</p>
+      <label for="share-link">Ready to share</label>
+      <input id="share-link" type="text" readonly placeholder="Your themed link appears here" aria-label="Themed link, ready to copy">
+      <div class="actions"><button id="copy" type="submit" disabled>Copy link <span aria-hidden="true">↗</span></button><button id="preview" type="button" disabled>Preview</button></div>
+      <p id="status" role="status" aria-live="polite"></p>
+    </form>
+    <footer>Also in your right-click menu. <span id="shortcut"></span></footer>
+  </main>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
