@@ -1,20 +1,40 @@
 {
   "manifest_version": 3,
   "name": "GitHub / Unsuck",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Copy GitHub links with dark or light previews, from your toolbar or right-click menu.",
   "minimum_chrome_version": "116",
-  "permissions": ["activeTab", "storage", "contextMenus", "offscreen", "clipboardWrite"],
+  "permissions": [
+    "activeTab",
+    "storage",
+    "contextMenus",
+    "offscreen",
+    "clipboardWrite"
+  ],
   "action": {
     "default_title": "Copy a themed GitHub link",
     "default_popup": "popup.html",
-    "default_icon": { "16": "icons/16.png", "32": "icons/32.png" }
+    "default_icon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png"
+    }
   },
-  "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" },
-  "background": { "service_worker": "background.js", "type": "module" },
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
   "commands": {
     "copy-link": {
-      "suggested_key": { "default": "Alt+Shift+U", "mac": "Command+Shift+U" },
+      "suggested_key": {
+        "default": "Alt+Shift+U",
+        "mac": "Command+Shift+U"
+      },
       "description": "Copy the current GitHub page as a themed link"
     }
   }

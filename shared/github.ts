@@ -1,4 +1,5 @@
-export type Theme = "dark" | "light" | "auto";
+import { themeTools, type PaletteTheme } from "./themes.ts";
+export type Theme = string;
 export type Metadata = { title: string; description: string; image: string; imageAlt: string };
 export class HttpError extends Error {
   status: number;
@@ -21,8 +22,8 @@ export function githubUrl(input: string): URL {
 
 export function themeParam(value: string | null): Theme {
   if (!value) return "dark";
-  if (value === "dark" || value === "light" || value === "auto") return value;
-  throw new HttpError(400, "Theme must be dark, light, or auto.");
+  try { themeTools.resolve(value); return value; }
+  catch (error) { throw new HttpError(400, error.message); }
 }
 
 export function escapeHtml(value: string): string {
@@ -115,11 +116,12 @@ export async function loadMetadata(target: URL, fetcher: typeof fetch = fetch): 
   throw new HttpError(502, "GitHub redirected too many times.");
 }
 
-export function imageUrl(metadata: Metadata, theme: "dark" | "light"): string {
-  if (theme === "light") return metadata.image;
+export function imageUrl(metadata: Metadata, theme: string | PaletteTheme): string {
+  const selected = typeof theme === "string" ? themeTools.resolve(theme) : themeTools.resolve(theme.id, theme.id === "custom" ? theme.colors.join("-") : undefined, theme.name);
+  if (selected.id === "light") return metadata.image;
   // Reuse GitHub's exact card layout and details. Duotone maps its white background
   // to GitHub dark and its dark text to light; artwork also becomes duotone.
   const image = new URL("https://wsrv.nl/");
-  image.search = new URLSearchParams({ url: metadata.image, filt: "duotone", start: "e6edf3", stop: "0d1117", output: "png", w: "1200" }).toString();
+  image.search = new URLSearchParams({ url: metadata.image, filt: "duotone", start: selected.colors[1], stop: selected.colors[0], output: "png", w: "1200" }).toString();
   return image.href;
 }

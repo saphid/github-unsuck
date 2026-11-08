@@ -22,6 +22,11 @@ Chrome 116 or newer is required. No build is needed to load the source folder.
   current GitHub page directly. Change conflicts at `chrome://extensions/shortcuts`.
 - On another site, open the extension and paste a public GitHub URL or an
   `owner/repository` path.
+- Choose a named editor theme such as Dracula, Nord, or Catppuccin in the popup.
+  The selection also applies to the right-click menu and shortcut.
+- **Explore themes + import from VS Code** opens the full theme gallery with
+  your current GitHub link. Imported palettes are used by links created on that
+  page; the extension remembers its own named/system theme separately.
 - **Preview** opens the rendered card without immediately forwarding to GitHub.
 
 **Match my system** is the default. It reads your appearance at creation time

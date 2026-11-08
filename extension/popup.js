@@ -1,4 +1,4 @@
-import { DEFAULT_THEME, makePreviewLink, makeShareLink, normalizeGithubUrl, resolveTheme, validTheme } from "./links.js";
+import { DEFAULT_THEME, PRESET_THEMES, SERVICE_ORIGIN, makePreviewLink, makeShareLink, normalizeGithubUrl, resolveTheme, validTheme } from "./links.js";
 
 const input = document.getElementById("github-url");
 const theme = document.getElementById("theme");
@@ -7,6 +7,14 @@ const copy = document.getElementById("copy");
 const preview = document.getElementById("preview");
 const status = document.getElementById("status");
 const appearance = matchMedia("(prefers-color-scheme: dark)");
+for (const [id, label] of PRESET_THEMES) theme.add(new Option(label, id));
+const themesPage = document.getElementById("themes-page");
+themesPage.addEventListener("click", event => {
+  const url = new URL("/themes", SERVICE_ORIGIN);
+  try { url.searchParams.set("url", normalizeGithubUrl(input.value)); } catch { /* Keep the gallery's sample URL. */ }
+  url.searchParams.set("theme", resolveTheme(theme.value, appearance.matches));
+  event.currentTarget.href = url.href;
+});
 let ready = false;
 let busy = false;
 

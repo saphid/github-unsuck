@@ -22,5 +22,5 @@ function route(path: `/${string}`) {
 export default capsule({
   name: "theme-unfurl",
   auth: { requireSignIn: false },
-  endpoints: { home: route("/make"), unfurl: route("/u"), image: route("/image"), health: route("/api/health"), robots: route("/robots.txt") }
+  endpoints: { home: route("/make"), themes: route("/themes"), unfurl: route("/u"), image: route("/image"), health: route("/api/health"), robots: route("/robots.txt") }
 });

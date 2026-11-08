@@ -1,5 +1,12 @@
 export const SERVICE_ORIGIN = "https://github-unsuck.lakebed.app";
 export const DEFAULT_THEME = "system";
+export const PRESET_THEMES = [
+  ["vscode-dark", "VS Code · Dark+"], ["vscode-light", "VS Code · Light+"],
+  ["catppuccin-mocha", "Catppuccin · Mocha"], ["catppuccin-latte", "Catppuccin · Latte"],
+  ["dracula", "Dracula"], ["nord", "Nord"], ["one-dark-pro", "One Dark Pro"],
+  ["solarized-dark", "Solarized Dark"], ["solarized-light", "Solarized Light"]
+];
+const explicitThemes = ["dark", "light", ...PRESET_THEMES.map(([id]) => id)];
 
 export function normalizeGithubUrl(input) {
   const value = String(input ?? "").trim();
@@ -20,7 +27,7 @@ export function normalizeGithubUrl(input) {
 }
 
 export function validTheme(value) {
-  return ["dark", "light", "system"].includes(value) ? value : DEFAULT_THEME;
+  return [...explicitThemes, "system"].includes(value) ? value : DEFAULT_THEME;
 }
 
 export function resolveTheme(mode, systemDark) {
@@ -29,7 +36,7 @@ export function resolveTheme(mode, systemDark) {
 }
 
 export function makeShareLink(input, theme) {
-  if (theme !== "dark" && theme !== "light") throw new Error("Choose dark or light before creating the link.");
+  if (!explicitThemes.includes(theme)) throw new Error("Choose a supported theme before creating the link.");
   const url = new URL("/u", SERVICE_ORIGIN);
   url.search = new URLSearchParams({ url: normalizeGithubUrl(input), theme }).toString();
   return url.href;

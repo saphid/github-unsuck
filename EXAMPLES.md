@@ -12,6 +12,12 @@ link previews. Clicking the shared link opens the original GitHub page.
 - Dark issue:
   https://github-unsuck.lakebed.app/u?url=expressjs/express/issues/7588&theme=dark
 
+Additional editor palettes:
+
+- Nord: https://github-unsuck.lakebed.app/u?url=saphid/github-unsuck&theme=nord
+- Catppuccin Mocha: https://github-unsuck.lakebed.app/u?url=saphid/github-unsuck&theme=catppuccin-mocha
+- VS Code Dark+: https://github-unsuck.lakebed.app/u?url=saphid/github-unsuck&theme=vscode-dark
+
 To inspect the card in a browser without leaving for GitHub:
 
 - https://github-unsuck.lakebed.app/u?url=expressjs/express&theme=dark&preview=1
