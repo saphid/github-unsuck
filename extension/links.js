@@ -1,5 +1,10 @@
+import { createServiceTools } from "./service-runtime.js";
+
 export const SERVICE_ORIGIN = "https://github-unsuck.lakebed.app";
 export const DEFAULT_THEME = "system";
+const serviceTools = createServiceTools();
+export const SUPPORTED_SERVICES = serviceTools.services;
+export const SUPPORTED_URL_PATTERNS = [...new Set(SUPPORTED_SERVICES.flatMap(service => service.hosts.map(host => `https://${host}/*`)))];
 export const PRESET_THEMES = [
   ["t3-code-dark", "T3 Code · Dark"], ["t3-code-light", "T3 Code · Light"],
   ["t3-chat-dark", "T3 Chat · Dark"], ["t3-chat-light", "T3 Chat · Light"],
@@ -29,6 +34,10 @@ export function normalizeGithubUrl(input) {
   return url.href;
 }
 
+export function normalizeSupportedUrl(input) {
+  return serviceTools.normalize(input);
+}
+
 export function validTheme(value) {
   return [...explicitThemes, "system"].includes(value) ? value : DEFAULT_THEME;
 }
@@ -40,14 +49,16 @@ export function resolveTheme(mode, systemDark) {
 
 export function makeShareLink(input, theme) {
   if (!explicitThemes.includes(theme)) throw new Error("Choose a supported theme before creating the link.");
-  const url = new URL("/u", SERVICE_ORIGIN);
-  url.search = new URLSearchParams({ url: normalizeGithubUrl(input), theme }).toString();
+  const original = normalizeSupportedUrl(input);
+  const service = serviceTools.detect(original);
+  const url = new URL(service.id === "github" ? "/u" : service.route, SERVICE_ORIGIN);
+  url.search = new URLSearchParams({ url: original, theme }).toString();
   return url.href;
 }
 
 export function makePreviewLink(shareLink) {
   const url = new URL(shareLink);
-  if (url.origin !== SERVICE_ORIGIN || url.pathname !== "/u") throw new Error("Not a themed GitHub link.");
+  if (url.origin !== SERVICE_ORIGIN || url.username || url.password || !["/u", ...SUPPORTED_SERVICES.map(service => service.route)].includes(url.pathname)) throw new Error("Not a supported themed link.");
   url.searchParams.set("preview", "1");
   return url.href;
 }

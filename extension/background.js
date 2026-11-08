@@ -1,4 +1,4 @@
-import { DEFAULT_THEME, makeShareLink, normalizeGithubUrl, resolveTheme, validTheme } from "./links.js";
+import { DEFAULT_THEME, SUPPORTED_URL_PATTERNS, makeShareLink, normalizeSupportedUrl, resolveTheme, validTheme } from "./links.js";
 
 export function createActions(browser) {
   let creatingDocument;
@@ -16,7 +16,7 @@ export function createActions(browser) {
           await browser.offscreen.createDocument({
             url: "offscreen.html",
             reasons: ["CLIPBOARD", "MATCH_MEDIA"],
-            justification: "Copy themed GitHub links and read your system color preference."
+            justification: "Copy themed links and read your system color preference."
           });
         }
       })().finally(() => { creatingDocument = undefined; });
@@ -33,7 +33,7 @@ export function createActions(browser) {
 
   async function copyLink(input, mode) {
     // Reject unsupported URLs before creating a document or touching clipboard.
-    const original = normalizeGithubUrl(input);
+    const original = normalizeSupportedUrl(input);
     const stored = mode ?? (await browser.storage.local.get({ theme: DEFAULT_THEME })).theme;
     const selection = validTheme(stored);
     const systemDark = selection === "system" ? (await offscreenRequest("system-theme")).dark : false;
@@ -53,23 +53,23 @@ export function registerBackground(browser) {
     await Promise.all([
       browser.action.setBadgeText({ ...target, text: error ? "!" : "✓" }),
       browser.action.setBadgeBackgroundColor({ ...target, color: error ? "#b42318" : "#238636" }),
-      browser.action.setTitle({ ...target, title: error ? error.message : "Themed GitHub link copied" })
+      browser.action.setTitle({ ...target, title: error ? error.message : "Themed link copied" })
     ]);
     setTimeout(() => {
       browser.action.setBadgeText({ ...target, text: "" }).catch(() => {});
-      browser.action.setTitle({ ...target, title: "Copy a themed GitHub link" }).catch(() => {});
+      browser.action.setTitle({ ...target, title: "Copy a themed link" }).catch(() => {});
     }, error ? 6000 : 2000);
   }
 
   browser.runtime.onInstalled.addListener(() => {
     browser.contextMenus.removeAll(() => {
       browser.contextMenus.create({
-        id: "copy-github-link", title: "Copy themed GitHub link", contexts: ["link"],
-        targetUrlPatterns: ["https://github.com/*"]
+        id: "copy-github-link", title: "Copy themed link", contexts: ["link"],
+        targetUrlPatterns: SUPPORTED_URL_PATTERNS
       });
       browser.contextMenus.create({
-        id: "copy-github-page", title: "Copy this page as a themed GitHub link", contexts: ["page"],
-        documentUrlPatterns: ["https://github.com/*"]
+        id: "copy-github-page", title: "Copy this page as a themed link", contexts: ["page"],
+        documentUrlPatterns: SUPPORTED_URL_PATTERNS
       });
     });
   });

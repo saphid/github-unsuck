@@ -30,3 +30,17 @@ To inspect the card in a browser without leaving for GitHub:
 
 Use the links without `preview=1` for normal sharing. Different chat apps apply
 their own preview caches; explicit dark/light URLs give them separate cache keys.
+
+## Other services
+
+These links open the original public page when clicked. Add `&preview=1` to
+inspect the themed card in a browser without continuing.
+
+- YouTube: https://github-unsuck.lakebed.app/youtube?url=https%3A%2F%2Fyoutu.be%2FdQw4w9WgXcQ&theme=dark
+- GitLab: https://github-unsuck.lakebed.app/gitlab?url=https%3A%2F%2Fgitlab.com%2Fgitlab-org%2Fgitlab&theme=dark
+- npm: https://github-unsuck.lakebed.app/npm?url=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Ftypescript&theme=dark
+- PyPI: https://github-unsuck.lakebed.app/pypi?url=https%3A%2F%2Fpypi.org%2Fproject%2Frequests%2F&theme=dark
+- Wikipedia: https://github-unsuck.lakebed.app/wikipedia?url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FTypeScript&theme=dark
+
+The same 16 presets and imported palettes work here. For example, append
+`&theme=t3-chat-dark` in place of `&theme=dark` for a T3 Chat card.

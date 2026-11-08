@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "GitHub / Unsuck",
-  "version": "0.2.1",
-  "description": "Copy GitHub links with dark or light previews, from your toolbar or right-click menu.",
+  "name": "Links / Unsuck",
+  "version": "0.3.0",
+  "description": "Copy links from supported services with themed previews, from your toolbar or right-click menu.",
   "minimum_chrome_version": "116",
   "permissions": [
     "activeTab",
@@ -12,7 +12,7 @@
     "clipboardWrite"
   ],
   "action": {
-    "default_title": "Copy a themed GitHub link",
+    "default_title": "Copy a themed link",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/16.png",
@@ -35,7 +35,7 @@
         "default": "Alt+Shift+U",
         "mac": "Command+Shift+U"
       },
-      "description": "Copy the current GitHub page as a themed link"
+      "description": "Copy the current supported page as a themed link"
     }
   }
 }

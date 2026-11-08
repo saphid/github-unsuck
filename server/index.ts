@@ -1,6 +1,7 @@
 import { capsule, endpoint, text } from "lakebed/server";
 import { handleRequest } from "../shared/app.ts";
 import { hostedGithubPaths } from "../shared/hosted-paths.ts";
+import { serviceTools } from "../shared/services.ts";
 
 // Lakebed 0.0.41 matches endpoint paths exactly. /u works for every GitHub URL;
 // registered path aliases also serve metadata without crawler JavaScript.
@@ -25,7 +26,8 @@ export default capsule({
   auth: { requireSignIn: false },
   endpoints: {
     home: route("/make"), themes: route("/themes"), unfurl: route("/u"),
-    image: route("/image"), health: route("/api/health"), robots: route("/robots.txt"),
+    image: route("/image"), card: route("/card.svg"), health: route("/api/health"), robots: route("/robots.txt"),
+    ...Object.fromEntries(serviceTools.services.map(service => [service.id, route(service.route as `/${string}`)])),
     ...Object.fromEntries(hostedGithubPaths.map((path, index) => [`githubPath${index}`, route(path, true)]))
   }
 });

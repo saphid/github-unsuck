@@ -7,6 +7,10 @@ ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / "extension"
 TARGET = ROOT / "dist" / "github-unsuck-extension.zip"
 
+# Chrome's unpacked extension cannot import files outside its own folder.
+# Keep URL validation identical to the service and gallery in every package.
+(SOURCE / "service-runtime.js").write_bytes((ROOT / "shared" / "service-runtime.js").read_bytes())
+
 manifest = json.loads((SOURCE / "manifest.json").read_text())
 required = {
     manifest["background"]["service_worker"],

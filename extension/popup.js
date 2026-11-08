@@ -1,4 +1,4 @@
-import { DEFAULT_THEME, PRESET_THEMES, SERVICE_ORIGIN, makePreviewLink, makeShareLink, normalizeGithubUrl, resolveTheme, validTheme } from "./links.js";
+import { DEFAULT_THEME, PRESET_THEMES, SERVICE_ORIGIN, SUPPORTED_SERVICES, makePreviewLink, makeShareLink, normalizeSupportedUrl, resolveTheme, validTheme } from "./links.js";
 
 const input = document.getElementById("github-url");
 const theme = document.getElementById("theme");
@@ -7,11 +7,12 @@ const copy = document.getElementById("copy");
 const preview = document.getElementById("preview");
 const status = document.getElementById("status");
 const appearance = matchMedia("(prefers-color-scheme: dark)");
+document.getElementById("input-note").textContent = "Current page, or paste a public link from " + SUPPORTED_SERVICES.map(service => service.name).join(", ") + ".";
 for (const [id, label] of PRESET_THEMES) theme.add(new Option(label, id));
 const themesPage = document.getElementById("themes-page");
 themesPage.addEventListener("click", event => {
   const url = new URL("/themes", SERVICE_ORIGIN);
-  try { url.searchParams.set("url", normalizeGithubUrl(input.value)); } catch { /* Keep the gallery's sample URL. */ }
+  try { url.searchParams.set("url", normalizeSupportedUrl(input.value)); } catch { /* Keep the gallery's sample URL. */ }
   url.searchParams.set("theme", resolveTheme(theme.value, appearance.matches));
   event.currentTarget.href = url.href;
 });
@@ -41,7 +42,7 @@ function update() {
 
 input.addEventListener("input", update);
 input.addEventListener("blur", () => {
-  if (input.value.trim() && !update()) message("Use a public GitHub link or owner/repository path.", true);
+  if (input.value.trim() && !update()) message("Use a public link from a supported service, or a GitHub owner/repository path.", true);
 });
 output.addEventListener("click", () => output.select());
 appearance.addEventListener("change", update);
@@ -87,7 +88,7 @@ async function initialize() {
   ]);
   theme.value = validTheme(stored.status === "fulfilled" ? stored.value.theme : DEFAULT_THEME);
   if (tabs.status === "fulfilled") {
-    try { input.value = normalizeGithubUrl(tabs.value[0]?.url); } catch { /* A pasted URL works on any page. */ }
+    try { input.value = normalizeSupportedUrl(tabs.value[0]?.url); } catch { /* A pasted URL works on any page. */ }
   }
   if (commands.status === "fulfilled") {
     const shortcut = commands.value.find(command => command.name === "copy-link")?.shortcut;

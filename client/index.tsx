@@ -9,5 +9,5 @@ export function App() {
       ? "/make" : githubPathTarget(url).href;
     window.location.replace(target);
   }, []);
-  return <main style={{ padding: "3rem", fontFamily: "system-ui" }}><h1>GitHub, minus the flashbang.</h1><a href="/make">Make a themed GitHub link</a></main>;
+  return <main style={{ padding: "3rem", fontFamily: "system-ui" }}><h1>Links, minus the flashbang.</h1><a href="/make">Make a themed link</a></main>;
 }
