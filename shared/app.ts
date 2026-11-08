@@ -12,21 +12,24 @@ const baseHeaders = {
   "Content-Security-Policy": "default-src 'none'; img-src 'self' https://wsrv.nl https://opengraph.githubassets.com https://repository-images.githubusercontent.com https://avatars.githubusercontent.com; style-src 'unsafe-inline'; script-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"
 };
 const style = `
-.service-examples{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0}.service-example{font-size:13px;border:1px solid var(--line);border-radius:999px;padding:5px 13px;text-decoration:none;background:var(--surface)}
+.service-examples{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0}.service-example{font-size:13px;border:1px solid var(--line);border-radius:999px;padding:5px 13px;text-decoration:none;background:var(--surface)}.service-example[aria-current=page]{border-color:var(--accent);color:var(--accent);font-weight:600}.service-discovery h2{font-size:15px;letter-spacing:0;margin:0;color:var(--fg)}.service-discovery .service-examples{margin:12px 0 24px}
 :root{color-scheme:light dark;--bg:#f6f8fa;--surface:#fff;--fg:#1f2328;--muted:#59636e;--line:#d1d9e0;--accent:#0969da}
 @media(prefers-color-scheme:dark){:root{--bg:#0d1117;--surface:#161b22;--fg:#e6edf3;--muted:#9198a1;--line:#30363d;--accent:#79c0ff}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:840px;margin:0 auto;padding:72px 24px 40px}.wordmark{font:600 13px ui-monospace,monospace;letter-spacing:.08em;color:var(--muted)}h1{font-size:clamp(36px,7vw,60px);line-height:1.08;letter-spacing:-.05em;font-weight:650;margin:36px 0 20px}p{color:var(--muted);max-width:640px}a{color:var(--accent);text-underline-offset:4px}form{margin-top:36px}label{display:block;font-weight:600;font-size:14px;margin:0 0 8px}.row{display:flex;gap:10px}input,select,button,.button{font:inherit;border:1px solid var(--line);border-radius:8px;padding:12px 16px;background:var(--surface);color:var(--fg)}input{min-width:0;flex:1;width:100%}button,.button{cursor:pointer;font-weight:600;white-space:nowrap;text-decoration:none}button[type=submit],.primary{background:var(--fg);color:var(--bg)}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.options{display:flex;align-items:center;gap:12px;margin:16px 0}.options label{margin:0}.options select{padding:8px 12px}.hint{font-size:13px;margin-top:14px}code{font-size:.9em;overflow-wrap:anywhere}#result{border-top:1px solid var(--line);margin-top:40px;padding-top:24px}img{display:block;width:100%;border-radius:12px;border:1px solid var(--line);height:auto}.result-actions{display:flex;flex-wrap:wrap;gap:12px;margin:18px 0}#output{font:13px/1.6 ui-monospace,monospace;margin:16px 0}footer{border-top:1px solid var(--line);padding-top:20px;margin-top:56px;font-size:13px;color:var(--muted)}[hidden]{display:none!important}#status{min-height:26px;font-size:14px} @media(max-width:560px){main{padding-top:36px}.row{flex-direction:column}.row button{width:100%}.result-actions>*{flex:1;text-align:center}}
 `;
-function shell(title: string, content: string, head = "", script = "", className = ""): string {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light"><title>${e(title)}</title>${head}<style>${style}</style></head><body><main class="${e(className)}"><div class="wordmark">LINKS / UNSUCK</div>${content}<footer>Themed previews for public links. Images use <a href="https://images.weserv.nl/">wsrv.nl</a>; GitHub artwork is recolored too.</footer></main>${script ? `<script>${script}</script>` : ""}</body></html>`;
+function serviceLinks(current = ""): string {
+  return serviceTools.services.map(service => `<a class="service-example" href="${e(service.route)}"${service.id === current ? ' aria-current="page"' : ''}>${e(service.name)}</a>`).join('');
+}
+function shell(title: string, content: string, head = "", script = "", className = "", currentService = ""): string {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light"><title>${e(title)}</title>${head}<style>${style}</style></head><body><main class="${e(className)}"><div class="wordmark">LINKS / UNSUCK</div>${content}<footer><nav class="service-discovery" aria-label="More Unsuck services"><h2>Better previews for your other links, too.</h2><div class="service-examples">${serviceLinks(currentService)}</div></nav><p>Themed previews for public links. Images use <a href="https://images.weserv.nl/">wsrv.nl</a>; GitHub artwork is recolored too.</p></footer></main>${script ? `<script>${script}</script>` : ""}</body></html>`;
 }
 export function home(url?: URL): AppResponse {
   const initial = url?.searchParams.get("url") || "";
-  const examples = serviceTools.services.map(service => `<a class="service-example" href="/make?url=${e(encodeURIComponent(service.example))}">${e(service.name)}</a>`).join('');
-  const body = shell("Links, minus the flashbang.", `
-    <h1>Better previews.<br>Same links.</h1>
-    <p>Share a video, project, package, or article with a preview in your favorite theme.</p>
-    <nav class="service-examples" aria-label="Try a service">${examples}</nav>
+  const currentService = serviceTools.services.find(service => service.route === url?.pathname);
+  const body = shell(currentService ? `${currentService.name} previews · Links / Unsuck` : "Links, minus the flashbang.", `
+    <h1>${currentService ? `${e(currentService.name)} links.<br>Your palette.` : 'Better previews.<br>Same links.'}</h1>
+    <p>${currentService ? `Give your ${e(currentService.name)} links a preview in your favorite theme.` : 'Share a video, project, package, or article with a preview in your favorite theme.'}</p>
+    <nav class="service-examples" aria-label="Try a service">${serviceLinks(currentService?.id)}</nav>
     <form id="builder" action="/u" method="get">
       <label for="github-url">Public link</label>
       <div class="row"><input id="github-url" name="url" type="text" value="${e(initial)}" placeholder="Paste a supported link or GitHub owner/repo" required autocomplete="off" spellcheck="false"><button type="submit">Make a link ↗</button></div>
@@ -40,7 +43,7 @@ form.addEventListener('submit',event=>{event.preventDefault();let target;try{tar
 form.elements.url.addEventListener('input',()=>form.elements.url.setCustomValidity(''));
 document.getElementById('browse-themes').addEventListener('click',event=>{const link=new URL('/themes',location.origin);if(form.elements.url.value.trim())link.searchParams.set('url',form.elements.url.value.trim());event.currentTarget.href=link.href;});
 document.getElementById('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(output.value);status.textContent='Link copied.';}catch{output.focus();output.select();status.textContent='Select and copy the link above.';}});
-`);
+`, "", currentService?.id);
   return { status: 200, headers: { ...baseHeaders, "Cache-Control": "public, max-age=300" }, body };
 }
 
@@ -57,7 +60,7 @@ export async function handleRequest(url: URL, headers: Pick<Headers, "get"> = ne
     if (url.pathname === "/make" || (url.pathname === "/" && !url.searchParams.get("url"))) return home(url);
     const routeService = serviceTools.services.find(service => service.route === url.pathname);
     if (routeService && !url.searchParams.get("url")) {
-      const builder = new URL('/make', url.origin);
+      const builder = new URL(url.href);
       builder.searchParams.set('url', routeService.example);
       return home(builder);
     }
@@ -94,7 +97,7 @@ export async function handleRequest(url: URL, headers: Pick<Headers, "get"> = ne
     // Bots read server-rendered tags without executing JS. Human clicks go straight
     // to the original page; carry a fragment supplied on the wrapper through to the destination.
     const script = url.searchParams.get("preview") === "1" ? "" : `const target=new URL(document.getElementById('github-link').href);if(location.hash)target.hash=location.hash;location.replace(target.href);`;
-    return { status: 200, headers: { ...baseHeaders, ...cacheHeaders }, body: shell(metadata.title, content, head, script) };
+    return { status: 200, headers: { ...baseHeaders, ...cacheHeaders }, body: shell(metadata.title, content, head, script, "", service.id) };
   } catch (error) {
     const known = error instanceof HttpError;
     const status = known ? error.status : 500;

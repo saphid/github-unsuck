@@ -79,6 +79,8 @@ credentials and cookies are never forwarded.
 The builder automatically detects the service. `/u?url=...` works for all six;
 service-specific URLs below check that the supplied link matches their service.
 Opening a service route without `url` shows the builder with an example filled in.
+Every service landing page links to the others, with the current service marked.
+The shared footer also lists all services on builders, theme pages, and previews.
 
 | Service | Route | Supported public pages | Metadata source |
 | --- | --- | --- | --- |
