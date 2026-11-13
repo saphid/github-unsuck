@@ -18,14 +18,14 @@ Independent review: Claude Opus 5.5 in Claude Code, high effort, completed task 
 
 The pages are rebuilt inside `worker.candidate.mjs`; there is no separate source or build step, so edit the bundle directly. Routing, link generation, card rendering, analytics, the budget guard and every response header are unchanged. `site.test.mjs` covers the page contract, and `budget-retry.test.mjs` asserts that non-page responses still match `worker.original.mjs` byte for byte.
 
-- `ze` is the stylesheet shared by every page and `pe` the theme gallery's. Both are plain CSS, one rule per line. Colors, fonts and motion are custom properties on `:root`, with a light scheme under `prefers-color-scheme`.
+- `ze` is the stylesheet shared by every page and `pe` the theme gallery's. Both are plain CSS, one rule per line. Colors, fonts and motion are custom properties on `:root`. The pages are dark whatever the system prefers; a site about removing flashbangs should not open white.
 - `M` is the page shell: site header, `<main>`, footer. Its fifth argument sets the body class (`home`, `theme-page`, or `plain` by default), which sets the page width.
-- `Z` renders the builder. The theme `<select>` stays in the form and remains the source of truth; the swatches and the chat demo are progressive enhancement that write to it and read from it. Without JavaScript the select shows and the swatches stay hidden.
+- `Z` renders the builder. The theme `<select>` stays in the form and remains the source of truth; the theme chips and the chat demo are progressive enhancement that write to it and read from it. Without JavaScript the select shows and the swatches stay hidden.
 - The demo card is HTML and CSS driven by `--t-*` custom properties, so changing theme costs no request. It illustrates the card layout; the real card still comes from `/image`.
 - The content security policy allows no external fonts, styles or scripts and only same-origin images, so the design uses system fonts, CSS gradients and inline SVG. `/favicon.svg` is a new route for the tab icon.
 - The analytics bootstrap (`Q`) escapes `<` in its JSON argument. The recovered bundle wrote the raw `?theme=` value into an inline script, which let a crafted link close the script element and run its own.
 
-The redesign was deployed as version ee66190a-58e4-46aa-90c4-56538a9c8cc2 on 2026-11-13 at 01:01 UTC, replacing 7212be64-8692-4799-b55f-25c3813eb889, which is the version to roll back to.
+The redesign was deployed as version ee66190a-58e4-46aa-90c4-56538a9c8cc2 on 2026-11-13 at 01:01 UTC, replacing 7212be64-8692-4799-b55f-25c3813eb889 (the last pre-redesign version). The dark-only pages and labelled theme chips followed as dcfe560e-6b98-4429-8065-7846bd7631a2 at 01:34 UTC; roll back to ee66190a for the first redesign or 7212be64 for the old pages.
 
 ## Outage monitor and responder
 
