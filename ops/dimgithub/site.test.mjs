@@ -100,6 +100,7 @@ test('the theme gallery keeps the elements its script drives', async () => {
 class FakeElement {
   constructor() {
     this.dataset = {}; this.attributes = {}; this.listeners = {}; this.hidden = false; this.textContent = ''; this.value = '';
+    this.scrolls = []; this.validity = { customError: false };
     this.properties = {}; this.style = { setProperty: (name, value) => { this.properties[name] = value; } };
   }
   setAttribute(name, value) { this.attributes[name] = value; }
@@ -107,7 +108,9 @@ class FakeElement {
   addEventListener(type, listener) { (this.listeners[type] ??= []).push(listener); }
   dispatchEvent(event) { for (const listener of this.listeners[event.type] ?? []) listener(event); return true; }
   click() { this.dispatchEvent({ type: 'click', currentTarget: this, preventDefault() {} }); }
-  setCustomValidity() {} reportValidity() {} focus() {} select() {}
+  setCustomValidity(message) { this.validity.customError = message !== ''; }
+  scrollIntoView(options) { this.scrolls.push(options); }
+  reportValidity() {} focus() {} select() {}
 }
 
 async function runBuilder(url, { reducedMotion = false } = {}) {
@@ -117,6 +120,9 @@ async function runBuilder(url, { reducedMotion = false } = {}) {
   const elements = Object.fromEntries(ids(html).map((id) => [id, Object.assign(new FakeElement(), { hidden: startsHidden(new RegExp(`<[^>]*\\sid="${id}"[^>]*>`)) })]));
   const dataAttributes = (tag) => Object.fromEntries([...tag.matchAll(/data-([a-z]+)="([^"]*)"/g)].map((match) => [match[1], match[2]]));
   const swatches = [...html.matchAll(/<button type="button" class="swatch"[^>]*>/g)].map((match) => Object.assign(new FakeElement(), { dataset: dataAttributes(match[0]) }));
+  // The chips sit in a scroller narrower than its content, as on a phone.
+  const row = { scrollWidth: 1300, clientWidth: 390, scrollLeft: 0 };
+  swatches.forEach((swatch, index) => Object.assign(swatch, { parentElement: row, offsetLeft: index * 150, offsetWidth: 140 }));
   const segments = [...html.matchAll(/<button type="button" data-state="[^"]*"[^>]*>/g)].map((match) => Object.assign(new FakeElement(), { dataset: dataAttributes(match[0]) }));
   const options = Object.assign(new FakeElement(), { hidden: startsHidden(/<div class="options"[^>]*>/) });
   const segmentGroup = Object.assign(new FakeElement(), { hidden: startsHidden(/<div class="seg"[^>]*>/) });
@@ -145,7 +151,7 @@ async function runBuilder(url, { reducedMotion = false } = {}) {
   sandbox.window = sandbox;
   vm.runInNewContext(html.match(/<script>([\s\S]*?)<\/script>/)[1], sandbox);
   const sent = () => requests.map((request) => [request.target, request.body?.event]);
-  return { html, elements, swatches, segments, options, segmentGroup, requests, sent, windowListeners, timers };
+  return { html, elements, swatches, row, segments, options, segmentGroup, requests, sent, windowListeners, timers };
 }
 
 test('loading the builder sends one page view and loads no card', async () => {
@@ -248,4 +254,45 @@ test('theme chips carry their own name and colours', async () => {
   assert.ok(html.includes('>Catppuccin Mocha</button>'));
   assert.ok(html.includes('>System</button>'));
   assert.equal([...html.matchAll(/<button type="button" class="swatch"[^>]*>[^<]+<\/button>/g)].length, 17);
+});
+
+test('the chip scroller reveals the selected and the focused chip', async () => {
+  const dom = await runBuilder('https://nord.dimgithub.com/make');
+  const nord = dom.swatches.find((swatch) => swatch.dataset.theme === 'nord');
+  assert.equal(dom.row.scrollLeft, nord.offsetLeft - (390 - 140) / 2);
+  dom.elements.theme.value = 'light';
+  for (const listener of dom.windowListeners.pageshow) listener({ type: 'pageshow' });
+  assert.equal(dom.row.scrollLeft, dom.swatches[1].offsetLeft - (390 - 140) / 2);
+  nord.dispatchEvent({ type: 'focus' });
+  assert.equal(JSON.stringify(nord.scrolls), JSON.stringify([{ inline: 'nearest', block: 'nearest' }]));
+  // Tapping a chip does not yank the scroller around.
+  const before = dom.row.scrollLeft;
+  nord.click();
+  assert.equal(dom.row.scrollLeft, before);
+});
+
+test('only a successful submission scrolls to the result', async () => {
+  const dom = await runBuilder('https://dimgithub.com/make');
+  const submit = () => dom.elements.builder.dispatchEvent({ type: 'submit', preventDefault() {} });
+  dom.elements['github-url'].value = 'ftp://x';
+  submit();
+  assert.equal(dom.elements.result.scrolls.length, 0);
+  dom.elements['github-url'].value = 'pingdotgg/t3code';
+  dom.elements['github-url'].dispatchEvent({ type: 'input' });
+  submit();
+  assert.equal(dom.elements.result.scrolls.length, 1);
+  dom.elements['github-url'].value = 'ftp://x';
+  submit();
+  assert.equal(dom.elements.result.scrolls.length, 1, 'a rejected resubmission leaves the page where it is');
+});
+
+test('every chip label is readable on its own background', async () => {
+  const { html } = await page('https://dimgithub.com/make');
+  const luminance = (hex) => [0, 2, 4].map((at) => parseInt(hex.slice(at, at + 2), 16) / 255).map((value) => (value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)).reduce((sum, value, at) => sum + value * [0.2126, 0.7152, 0.0722][at], 0);
+  const chips = [...html.matchAll(/style="--s-bg:#([0-9a-f]{6});--s-fg:#([0-9a-f]{6});--s-ac:[^"]*">([^<]+)<\/button>/g)];
+  assert.equal(chips.length, 17);
+  for (const [, background, text, name] of chips) {
+    const [high, low] = [luminance(background), luminance(text)].sort((a, b) => b - a);
+    assert.ok((high + 0.05) / (low + 0.05) >= 4.5, `${name}: ${((high + 0.05) / (low + 0.05)).toFixed(2)}`);
+  }
 });
