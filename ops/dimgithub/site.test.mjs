@@ -30,7 +30,7 @@ test('every preset is offered as a select option and a swatch', async () => {
 });
 
 test('inline scripts on every page parse', async () => {
-  for (const path of ['/', '/youtube', '/themes', '/make?theme=nord']) {
+  for (const path of ['/', '/github', '/themes', '/make?theme=nord']) {
     const { html } = await page('https://dimgithub.com' + path);
     const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((match) => match[1]);
     assert.equal(scripts.length, 1, path);
@@ -57,16 +57,27 @@ test('a crafted theme value cannot close the inline script', async () => {
     const { html } = await page(`https://dimgithub.com${path}?theme=${encodeURIComponent('</script><script>alert(1)</script>')}`);
     assert.equal(html.split('<script>').length - 1, 1, path);
     assert.equal(html.split('</script>').length - 1, 1, path);
-    assert.ok(html.includes('"theme":"\\u003c/script>'), path);
+    assert.ok(!html.includes('alert(1)'), path);
   }
 });
 
-test('service pages keep their heading, example and current marker', async () => {
-  const { html } = await page('https://dimgithub.com/youtube');
-  assert.ok(html.includes('<h1>YouTube links.<br>Your palette.</h1>'));
-  assert.ok(html.includes('value="https://www.youtube.com/watch?v=dQw4w9WgXcQ"'));
-  assert.ok(html.includes('href="/youtube" aria-current="page"'));
-  assert.ok(!html.includes('id="demo-sub"'), 'the dim prefix is a GitHub-only trick');
+test('the GitHub service page keeps its heading, example and current marker', async () => {
+  const { html } = await page('https://dimgithub.com/github');
+  assert.ok(html.includes('<h1>GitHub links.<br>Your palette.</h1>'));
+  assert.ok(html.includes('value="https://github.com/pingdotgg/t3code"'));
+  assert.ok(html.includes('href="/github" aria-current="page"'));
+  assert.ok(html.includes('id="demo-sub"'));
+});
+
+test('retired service pages are gone and no page offers them', async () => {
+  for (const path of ['/youtube', '/gitlab', '/npm', '/pypi', '/wikipedia', '/card.svg']) {
+    const response = await get('https://dimgithub.com' + path + '?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ');
+    assert.equal(response.status, 404, path);
+  }
+  for (const path of ['/', '/github', '/themes']) {
+    const { html } = await page('https://dimgithub.com' + path);
+    assert.ok(!/youtube|gitlab|npmjs|pypi|wikipedia|wsrv|weserv|posthog/i.test(html), path);
+  }
 });
 
 test('pages load nothing the content security policy would block', async () => {
@@ -154,9 +165,9 @@ async function runBuilder(url, { reducedMotion = false } = {}) {
   return { html, elements, swatches, row, segments, options, segmentGroup, requests, sent, windowListeners, timers };
 }
 
-test('loading the builder sends one page view and loads no card', async () => {
+test('loading the builder makes no requests and loads no card', async () => {
   const dom = await runBuilder('https://dimgithub.com/make');
-  assert.deepEqual(dom.sent(), [['/api/events', 'page_view']]);
+  assert.deepEqual(dom.sent(), []);
   assert.equal(dom.elements.result.hidden, true);
   assert.equal(dom.segments.length, 2);
   assert.equal(dom.elements.card.src, undefined);
@@ -179,20 +190,18 @@ test('a swatch drives the select, repaints the demo, and makes no image request'
   const dom = await runBuilder('https://dimgithub.com/make');
   dom.swatches.find((swatch) => swatch.dataset.theme === 'nord').click();
   assert.equal(dom.elements.theme.value, 'nord');
-  assert.deepEqual(dom.sent(), [['/api/events', 'page_view'], ['/api/events', 'theme_selected']]);
-  assert.equal(dom.requests[1].body.theme, 'nord');
+  assert.deepEqual(dom.sent(), []);
   assert.equal(dom.elements.demo.properties['--t-bg'], '#2e3440');
   assert.equal(dom.elements.demo.properties['--t-on'], '#eceff4');
   assert.equal(dom.elements['demo-sub'].textContent, 'nord.');
   assert.equal(dom.elements.demo.dataset.state, 'after');
   assert.equal(dom.elements.card.src, undefined);
   assert.deepEqual(dom.swatches.filter((swatch) => swatch.attributes['aria-pressed'] === 'true').map((swatch) => swatch.dataset.theme), ['nord']);
-  // Choosing the theme already selected is not a change and sends nothing.
   dom.swatches.find((swatch) => swatch.dataset.theme === 'nord').click();
-  assert.equal(dom.requests.length, 2);
+  assert.equal(dom.requests.length, 0);
 });
 
-test('submitting builds the same link and image request as before the redesign', async () => {
+test('submitting builds the same link and image request as before', async () => {
   const dom = await runBuilder('https://dimgithub.com/make');
   dom.swatches.find((swatch) => swatch.dataset.theme === 'dracula').click();
   dom.elements['github-url'].value = 'pingdotgg/t3code';
@@ -202,7 +211,7 @@ test('submitting builds the same link and image request as before the redesign',
   assert.equal(dom.elements.card.src, 'https://dimgithub.com/image?url=https%3A%2F%2Fgithub.com%2Fpingdotgg%2Ft3code&theme=dracula');
   assert.equal(dom.elements.original.href, 'https://github.com/pingdotgg/t3code');
   assert.equal(dom.elements.result.hidden, false);
-  assert.deepEqual(dom.sent(), [['/api/events', 'page_view'], ['/api/events', 'theme_selected'], ['/api/events', 'link_created']]);
+  assert.deepEqual(dom.sent(), [], 'the page itself sends no analytics or other requests');
 });
 
 test('a restored form selection repaints the swatches', async () => {
@@ -211,7 +220,7 @@ test('a restored form selection repaints the swatches', async () => {
   for (const listener of dom.windowListeners.pageshow) listener({ type: 'pageshow' });
   assert.deepEqual(dom.swatches.filter((swatch) => swatch.attributes['aria-pressed'] === 'true').map((swatch) => swatch.dataset.theme), ['solarized-light']);
   assert.equal(dom.elements['demo-sub'].textContent, 'solarized-light.');
-  assert.deepEqual(dom.sent(), [['/api/events', 'page_view']]);
+  assert.deepEqual(dom.sent(), []);
 });
 
 test('without scripts the form still submits a theme', async () => {
@@ -231,11 +240,11 @@ test('the comparison control switches the demo between both states', async () =>
   assert.deepEqual(dom.segments.map((segment) => segment.attributes['aria-pressed']), ['true', 'false']);
   dimmed.click();
   assert.equal(dom.elements.demo.dataset.state, 'after');
-  assert.deepEqual(dom.sent(), [['/api/events', 'page_view']]);
+  assert.deepEqual(dom.sent(), []);
 });
 
 test('every page is dark whatever the system prefers', async () => {
-  for (const path of ['/', '/youtube', '/themes', '/u?url=ftp://x']) {
+  for (const path of ['/', '/github', '/themes', '/u?url=ftp://x']) {
     const { html } = await page('https://dimgithub.com' + path);
     assert.ok(html.includes('<meta name="color-scheme" content="dark">'), path);
     assert.ok(html.includes(':root{color-scheme:dark;--bg:#0a0b0e;'), path);
