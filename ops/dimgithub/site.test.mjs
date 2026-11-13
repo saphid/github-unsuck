@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import vm from 'node:vm';
+import { readFileSync } from 'node:fs';
 import worker, { themeForHostname } from './worker.candidate.mjs';
 
 const get = (url, headers = {}) => worker.fetch(new Request(url, { headers }), {}, {});
@@ -12,7 +13,7 @@ test('the home page keeps every element its script drives', async () => {
   const { response, html } = await page('https://dimgithub.com/');
   assert.equal(response.status, 200);
   const found = ids(html);
-  for (const id of ['builder', 'github-url', 'theme', 'swatches', 'swatch-name', 'browse-themes', 'result', 'output', 'copy', 'original', 'status', 'card', 'demo', 'demo-sub', 'demo-theme']) {
+  for (const id of ['builder', 'github-url', 'theme', 'swatches', 'swatch-label', 'browse-themes', 'result', 'output', 'copy', 'original', 'status', 'card', 'demo', 'demo-sub', 'demo-theme']) {
     assert.equal(found.filter((item) => item === id).length, 1, id);
   }
   assert.equal(new Set(found).size, found.length, 'ids are unique');
@@ -177,7 +178,6 @@ test('a swatch drives the select, repaints the demo, and makes no image request'
   assert.equal(dom.elements.demo.properties['--t-bg'], '#2e3440');
   assert.equal(dom.elements.demo.properties['--t-on'], '#eceff4');
   assert.equal(dom.elements['demo-sub'].textContent, 'nord.');
-  assert.equal(dom.elements['swatch-name'].textContent, 'Nord');
   assert.equal(dom.elements.demo.dataset.state, 'after');
   assert.equal(dom.elements.card.src, undefined);
   assert.deepEqual(dom.swatches.filter((swatch) => swatch.attributes['aria-pressed'] === 'true').map((swatch) => swatch.dataset.theme), ['nord']);
@@ -203,7 +203,7 @@ test('a restored form selection repaints the swatches', async () => {
   const dom = await runBuilder('https://dimgithub.com/make');
   dom.elements.theme.value = 'solarized-light';
   for (const listener of dom.windowListeners.pageshow) listener({ type: 'pageshow' });
-  assert.equal(dom.elements['swatch-name'].textContent, 'Solarized Light');
+  assert.deepEqual(dom.swatches.filter((swatch) => swatch.attributes['aria-pressed'] === 'true').map((swatch) => swatch.dataset.theme), ['solarized-light']);
   assert.equal(dom.elements['demo-sub'].textContent, 'solarized-light.');
   assert.deepEqual(dom.sent(), [['/api/events', 'page_view']]);
 });
@@ -226,4 +226,26 @@ test('the comparison control switches the demo between both states', async () =>
   dimmed.click();
   assert.equal(dom.elements.demo.dataset.state, 'after');
   assert.deepEqual(dom.sent(), [['/api/events', 'page_view']]);
+});
+
+test('every page is dark whatever the system prefers', async () => {
+  for (const path of ['/', '/youtube', '/themes', '/u?url=ftp://x']) {
+    const { html } = await page('https://dimgithub.com' + path);
+    assert.ok(html.includes('<meta name="color-scheme" content="dark">'), path);
+    assert.ok(html.includes(':root{color-scheme:dark;--bg:#0a0b0e;'), path);
+    assert.ok(!/prefers-color-scheme|light-dark\(|color-scheme:[^;}]*light/.test(html.replace(/<script>[\s\S]*?<\/script>/, '')), path);
+  }
+  // The redirect interstitial people may glimpse on the way to a link is dark as well.
+  const bundle = readFileSync(new URL('./worker.candidate.mjs', import.meta.url), 'utf8');
+  assert.ok(bundle.includes('<style>:root{color-scheme:dark}body{margin:0;min-height:100svh;display:grid;place-items:center;background:#0a0b0e;color:#eef0f4;'));
+  assert.ok(!bundle.includes('light-dark('));
+});
+
+test('theme chips carry their own name and colours', async () => {
+  const { html } = await page('https://dimgithub.com/make');
+  assert.ok(html.includes('style="--s-bg:#2e3440;--s-fg:#eceff4;--s-ac:#88c0d0">Nord</button>'));
+  assert.ok(html.includes('>VS Code Dark+</button>'));
+  assert.ok(html.includes('>Catppuccin Mocha</button>'));
+  assert.ok(html.includes('>System</button>'));
+  assert.equal([...html.matchAll(/<button type="button" class="swatch"[^>]*>[^<]+<\/button>/g)].length, 17);
 });
