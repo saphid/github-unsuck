@@ -93,3 +93,119 @@ test('the theme gallery keeps the elements its script drives', async () => {
     assert.equal(found.filter((item) => item === id).length, 1, id);
   }
 });
+
+// A small stand-in DOM: enough to run the builder's inline script and observe what it
+// does, so the tests fail if the page starts making requests or building links differently.
+class FakeElement {
+  constructor() {
+    this.dataset = {}; this.attributes = {}; this.listeners = {}; this.hidden = false; this.textContent = ''; this.value = '';
+    this.properties = {}; this.style = { setProperty: (name, value) => { this.properties[name] = value; } };
+  }
+  setAttribute(name, value) { this.attributes[name] = value; }
+  getAttribute(name) { return this.attributes[name]; }
+  addEventListener(type, listener) { (this.listeners[type] ??= []).push(listener); }
+  dispatchEvent(event) { for (const listener of this.listeners[event.type] ?? []) listener(event); return true; }
+  click() { this.dispatchEvent({ type: 'click', currentTarget: this, preventDefault() {} }); }
+  setCustomValidity() {} reportValidity() {} focus() {} select() {}
+}
+
+async function runBuilder(url, { reducedMotion = false } = {}) {
+  const { html } = await page(url);
+  const elements = Object.fromEntries(ids(html).map((id) => [id, new FakeElement()]));
+  const dataAttributes = (tag) => Object.fromEntries([...tag.matchAll(/data-([a-z]+)="([^"]*)"/g)].map((match) => [match[1], match[2]]));
+  const swatches = [...html.matchAll(/<button type="button" class="swatch"[^>]*>/g)].map((match) => Object.assign(new FakeElement(), { dataset: dataAttributes(match[0]) }));
+  const segments = [...html.matchAll(/<button type="button" data-state="[^"]*"[^>]*>/g)].map((match) => Object.assign(new FakeElement(), { dataset: dataAttributes(match[0]) }));
+  const options = new FakeElement(), segmentGroup = new FakeElement();
+  elements.theme.value = html.match(/<option value="([^"]+)" selected>/)?.[1] ?? 'dark';
+  elements['github-url'].value = html.match(/id="github-url" name="url" type="text" value="([^"]*)"/)[1];
+  elements.builder.elements = { url: elements['github-url'], theme: elements.theme };
+  elements.demo.querySelectorAll = () => segments;
+  elements.demo.querySelector = () => segmentGroup;
+  const requests = [], windowListeners = {}, timers = [];
+  const sandbox = {
+    URL, URLSearchParams, AbortSignal, Event, TextEncoder,
+    location: new URL(url),
+    navigator: { userAgent: 'Mozilla/5.0 (Macintosh)', clipboard: { writeText: async () => {} } },
+    document: {
+      prerendering: false,
+      getElementById: (id) => elements[id] ?? null,
+      querySelectorAll: (selector) => (selector === '.swatch' ? swatches : []),
+      querySelector: (selector) => (selector === '.options' ? options : null),
+      addEventListener() {},
+    },
+    fetch: (target, init) => { requests.push({ target, body: JSON.parse(init.body) }); return Promise.resolve(new Response(null, { status: 204 })); },
+    matchMedia: (query) => ({ matches: reducedMotion && query.includes('reduced-motion') }),
+    setTimeout: (callback, delay) => timers.push({ callback, delay }), clearTimeout() {},
+    addEventListener: (type, listener) => { (windowListeners[type] ??= []).push(listener); },
+  };
+  sandbox.window = sandbox;
+  vm.runInNewContext(html.match(/<script>([\s\S]*?)<\/script>/)[1], sandbox);
+  return { html, elements, swatches, segments, options, segmentGroup, requests, windowListeners, timers };
+}
+
+test('loading the builder sends one page view and loads no card', async () => {
+  const dom = await runBuilder('https://dimgithub.com/make');
+  assert.deepEqual(dom.requests.map((request) => [request.target, request.body.event]), [['/api/events', 'page_view']]);
+  assert.equal(dom.elements.card.src, undefined);
+  assert.equal(dom.elements.swatches.hidden, false);
+  assert.equal(dom.options.hidden, true);
+  assert.equal(dom.segmentGroup.hidden, false);
+  assert.equal(dom.elements.demo.dataset.state, 'before');
+  assert.deepEqual(dom.timers.map((timer) => timer.delay), [1400]);
+  dom.timers[0].callback();
+  assert.equal(dom.elements.demo.dataset.state, 'after');
+});
+
+test('reduced motion skips the introductory flash', async () => {
+  const dom = await runBuilder('https://dimgithub.com/make', { reducedMotion: true });
+  assert.equal(dom.elements.demo.dataset.state, 'after');
+  assert.equal(dom.timers.length, 0);
+});
+
+test('a swatch drives the select, repaints the demo, and makes no image request', async () => {
+  const dom = await runBuilder('https://dimgithub.com/make');
+  dom.swatches.find((swatch) => swatch.dataset.theme === 'nord').click();
+  assert.equal(dom.elements.theme.value, 'nord');
+  assert.deepEqual(dom.requests.map((request) => request.body.event), ['page_view', 'theme_selected']);
+  assert.equal(dom.requests[1].body.theme, 'nord');
+  assert.equal(dom.elements.demo.properties['--t-bg'], '#2e3440');
+  assert.equal(dom.elements.demo.properties['--t-on'], '#eceff4');
+  assert.equal(dom.elements['demo-sub'].textContent, 'nord.');
+  assert.equal(dom.elements['swatch-name'].textContent, 'Nord');
+  assert.equal(dom.elements.demo.dataset.state, 'after');
+  assert.equal(dom.elements.card.src, undefined);
+  assert.deepEqual(dom.swatches.filter((swatch) => swatch.attributes['aria-pressed'] === 'true').map((swatch) => swatch.dataset.theme), ['nord']);
+  // Choosing the theme already selected is not a change and sends nothing.
+  dom.swatches.find((swatch) => swatch.dataset.theme === 'nord').click();
+  assert.equal(dom.requests.length, 2);
+});
+
+test('submitting builds the same link and image request as before the redesign', async () => {
+  const dom = await runBuilder('https://dimgithub.com/make');
+  dom.swatches.find((swatch) => swatch.dataset.theme === 'dracula').click();
+  dom.elements['github-url'].value = 'pingdotgg/t3code';
+  dom.elements.builder.dispatchEvent({ type: 'submit', preventDefault() {} });
+  assert.equal(dom.elements.output.value, 'https://dimgithub.com/u?url=https%3A%2F%2Fgithub.com%2Fpingdotgg%2Ft3code&theme=dracula');
+  assert.equal(dom.elements.card.src, 'https://dimgithub.com/image?url=https%3A%2F%2Fgithub.com%2Fpingdotgg%2Ft3code&theme=dracula');
+  assert.equal(dom.elements.original.href, 'https://github.com/pingdotgg/t3code');
+  assert.equal(dom.elements.result.hidden, false);
+  assert.deepEqual(dom.requests.map((request) => request.body.event), ['page_view', 'theme_selected', 'link_created']);
+});
+
+test('a restored form selection repaints the swatches', async () => {
+  const dom = await runBuilder('https://dimgithub.com/make');
+  dom.elements.theme.value = 'solarized-light';
+  for (const listener of dom.windowListeners.pageshow) listener({ type: 'pageshow' });
+  assert.equal(dom.elements['swatch-name'].textContent, 'Solarized Light');
+  assert.equal(dom.elements['demo-sub'].textContent, 'solarized-light.');
+  assert.equal(dom.requests.length, 1);
+});
+
+test('without scripts the form still submits a theme', async () => {
+  const { html } = await page('https://light.dimgithub.com/make');
+  const form = html.slice(html.indexOf('<form id="builder" action="/u" method="get">'), html.indexOf('</form>'));
+  assert.match(form, /<div class="options"><label for="theme">Preview theme<\/label><select name="theme" id="theme">/);
+  assert.match(form, /<option value="light" selected>/);
+  assert.match(form, /<div class="swatches" id="swatches" hidden>/);
+  assert.match(form, /<input id="github-url" name="url" type="text"/);
+});
