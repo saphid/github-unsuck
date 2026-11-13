@@ -1,0 +1,7 @@
+{
+  "name": "cap-reached",
+  "description": "Real budget shutdown: bindings deleted and worker requests at the $4 cap (8.1M requests). The responder must not restore; it must escalate.",
+  "probe": {"authoritative_empty": ["dimgithub.com", "t3-code-dark.dimgithub.com"]},
+  "cloudflare": {"domains_present": [], "pause_secret": true, "usage": {"requests": 8100000, "subrequests": 81000}},
+  "heal_on_write": false
+}

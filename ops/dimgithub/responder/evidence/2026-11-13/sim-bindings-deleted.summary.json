@@ -1,0 +1,97 @@
+{
+ "incidents": {
+  "SIM-20261113T005230Z": {
+   "actions": [
+    {
+     "at": "2026-11-13T00:52:43Z",
+     "dry_run": true,
+     "failed": 0,
+     "kind": "restore-domains",
+     "restored": 20,
+     "still_missing": 0,
+     "worker_spend_usd": 0.0092
+    },
+    {
+     "analytics_spend_usd": 0.7133,
+     "at": "2026-11-13T00:55:24Z",
+     "dry_run": true,
+     "kind": "clear-pause",
+     "still_set": false
+    }
+   ],
+   "class": "dns-missing",
+   "closed_at": "2026-11-13T01:03:00Z",
+   "confirmed_at": "2026-11-13T00:52:30Z",
+   "first_failure_at": "2026-11-13T00:52:20Z",
+   "healthy_since": "2026-11-13T00:53:00Z",
+   "id": "SIM-20261113T005230Z",
+   "kind": "outage",
+   "opened_at": "2026-11-13T00:52:30Z",
+   "pause_clears": 1,
+   "restores": 1,
+   "runs": [
+    {
+     "attempts": [
+      {
+       "cost_usd": 0.29663280000000003,
+       "error": null,
+       "exit": 0,
+       "models": [
+        "claude-opus-5-5"
+       ],
+       "ok": true,
+       "route": "claude-proxy",
+       "seconds": 188,
+       "turns": 6
+      }
+     ],
+     "branch": "A1-restore",
+     "finished_at": "2026-11-13T00:55:41Z",
+     "launched_at": "2026-11-13T00:52:30Z",
+     "outcome": "restored",
+     "reason": "initial",
+     "run": 1,
+     "started_at": "2026-11-13T00:52:30Z",
+     "summary": "The watchdog had deleted all 20 dimgithub.com custom-domain bindings and set POSTHOG_PAUSED_MONTH, although spend was well under both caps (worker $0.0092 of $4, analytics $0.71 of $4) and the usage read worked. I restored all 20 bindings, they stayed 20/20 through a 3-minute watch, and I then cleared the pause secret (B1); the final diagnose is healthy, with authoritative DNS answering and HTTP 200. This was a simulation, so both writes were dry runs; 1 of 2 restores and 1 of 1 pause clears were used for this incident.",
+     "unit": "dimgithub-responder-sim-20261113t005230z-r1",
+     "verify": {
+      "class": "healthy",
+      "cloudflare": {
+       "budget": {
+        "analytics_cap_usd": 4,
+        "analytics_fraction": 0.1783,
+        "analytics_spend_usd": 0.7133,
+        "pauseAnalytics": false,
+        "since": "2026-11-10T23:39:20Z",
+        "stopSite": false,
+        "worker_cap_usd": 4,
+        "worker_fraction": 0.0023,
+        "worker_spend_usd": 0.0092
+       },
+       "domains_expected": 20,
+       "domains_missing": [],
+       "domains_present": 20,
+       "pause_secret_present": false,
+       "zone_status": "active"
+      },
+      "probe": "healthy | dimgithub.com: auth-dns answer, http 200, local-dns ok; t3-code-dark.dimgithub.com: auth-dns answer, http 200, local-dns ok"
+     }
+    }
+   ],
+   "scenario": "bindings-deleted",
+   "sim": true,
+   "status": "resolved"
+  }
+ },
+ "agent_results": {
+  "SIM-20261113T005230Z/agent-r1-claude-proxy.json": {
+   "result": "I followed branch A1-restore and then B1-clear-pause. The site is back up and analytics forwarding is no longer paused. This was a simulation, so both writes ran as dry runs.\n\n- **Diagnosis:** The watchdog had deleted all 20 `dimgithub.com` custom-domain bindings. The authoritative nameservers returned NXDOMAIN for both probed hosts, and the `POSTHOG_PAUSED_MONTH` secret was set. The usage read worked and spend was far below both caps: worker $0.0092 of $4 and analytics $0.71 of $4. Neither `stopSite` nor `pauseAnalytics` was set, the zone was active and there were no Worker errors.\n- **A1-restore:** `restore-domains` re-created all 20 hostnames with none failed, using 1 of 2 restores for this incident. A 180-second watch showed 20/20 bindings and a `healthy` class at all six checks, so the watchdog did not delete them again.\n- **B1-clear-pause:** `clear-pause` re-read usage, deleted `POSTHOG_PAUSED_MONTH`, and reported it is no longer set.\n- **Final check:** The last `diagnose` shows class `healthy`, 20/20 bindings and no pause secret. Both nameservers return NOERROR with addresses, both probed hosts return HTTP 200, and Worker errors are at 0.\n\nIts `suggested_branch` of `E-false-alarm` only reflects the recovered state. This was a real binding loss.\n\nRESULT {\"branch\": \"A1-restore\", \"outcome\": \"restored\", \"summary\": \"The watchdog had deleted all 20 dimgithub.com custom-domain bindings and set POSTHOG_PAUSED_MONTH, although spend was well under both caps (worker $0.0092 of $4, analytics $0.71 of $4) and the usage read worked. I restored all 20 bindings, they stayed 20/20 through a 3-minute watch, and I then cleared the pause secret (B1); the final diagnose is healthy, with authoritative DNS answering and HTTP 200. This was a simulation, so both writes were dry runs; 1 of 2 restores and 1 of 1 pause clears were used for this incident.\"}",
+   "models": [
+    "claude-opus-5-5"
+   ],
+   "turns": 6,
+   "cost_usd": 0.29663280000000003,
+   "permission_denials": []
+  }
+ }
+}

@@ -26,3 +26,7 @@ The pages are rebuilt inside `worker.candidate.mjs`; there is no separate source
 - The analytics bootstrap (`Q`) escapes `<` in its JSON argument. The recovered bundle wrote the raw `?theme=` value into an inline script, which let a crafted link close the script element and run its own.
 
 The redesign was deployed as version ee66190a-58e4-46aa-90c4-56538a9c8cc2 on 2026-11-13 at 01:01 UTC, replacing 7212be64-8692-4799-b55f-25c3813eb889 (the last pre-redesign version). The dark-only pages and labelled theme chips followed as dcfe560e-6b98-4429-8065-7846bd7631a2 at 01:34 UTC; roll back to ee66190a for the first redesign or 7212be64 for the old pages.
+
+## Outage monitor and responder
+
+`responder/` holds the monitor that runs on lxso1 and the agent it launches when the site goes down. Start with `responder/README.md`; the agent's decision rules are in `responder/RUNBOOK.md`.

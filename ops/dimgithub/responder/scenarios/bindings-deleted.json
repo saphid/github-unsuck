@@ -1,0 +1,7 @@
+{
+  "name": "bindings-deleted",
+  "description": "Yesterday's failure: the watchdog deleted all custom-domain bindings and set the pause secret while spend is below cap. Real usage is read; bindings, pause secret and authoritative DNS are overridden; writes are dry-run and 'heal' the simulation.",
+  "probe": {"authoritative_empty": ["dimgithub.com", "t3-code-dark.dimgithub.com"]},
+  "cloudflare": {"domains_present": [], "pause_secret": true},
+  "heal_on_write": true
+}

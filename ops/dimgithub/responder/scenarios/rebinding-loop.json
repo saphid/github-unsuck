@@ -1,0 +1,7 @@
+{
+  "name": "rebinding-loop",
+  "description": "The watchdog keeps deleting the bindings after each restore (dry-run restores never heal). The restore cap must stop the loop and escalate.",
+  "probe": {"authoritative_empty": ["dimgithub.com", "t3-code-dark.dimgithub.com"]},
+  "cloudflare": {"domains_present": []},
+  "heal_on_write": false
+}

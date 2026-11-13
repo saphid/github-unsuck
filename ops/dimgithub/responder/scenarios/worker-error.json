@@ -1,0 +1,6 @@
+{
+  "name": "worker-error",
+  "description": "Bindings and DNS fine but /api/health returns 500 on the apex.",
+  "probe": {"http_status": {"dimgithub.com": 500}},
+  "heal_on_write": false
+}

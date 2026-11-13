@@ -1,0 +1,2 @@
+{"at": "2026-11-13T00:53:18Z", "event": "monitor-start", "pid": 1654715, "scenario": "local-dns-only"}
+{"at": "2026-11-13T00:53:18Z", "current": "healthy", "event": "class-change", "previous": null, "summary": "healthy | dimgithub.com: auth-dns answer, http 200, local-dns FAIL; t3-code-dark.dimgithub.com: auth-dns answer, http 200, local-dns FAIL"}
