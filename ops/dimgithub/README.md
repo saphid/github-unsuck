@@ -8,7 +8,7 @@ The read-only usage query gets at most three attempts for transient HTTP/network
 
 Keep `no_bundle: true`: the application serializes functions into browser scripts, and bundling inserts inaccessible helpers. The dry-run output must exactly match the candidate. Production bindings were read back before deployment: ANALYTICS_BURST namespace 343535, limit 30/60 seconds, and BUDGET_START_AT 2026-11-10T23:39:20.437756Z. Secret values are not included.
 
-Validation: `node --test ops/dimgithub/budget-retry.test.mjs ops/dimgithub/site.test.mjs`. Dry-run: `wrangler deploy --config ops/dimgithub/wrangler.jsonc --dry-run --outdir /tmp/dimgithub-build`. Compare the generated worker to the candidate before uploading. Avoid deploying the older Lakebed implementation over the live Cloudflare application.
+Validation: `node --test ops/dimgithub/budget-retry.test.mjs ops/dimgithub/site.test.mjs`. Dry-run: `wrangler deploy --config ops/dimgithub/wrangler.jsonc --dry-run --outdir /tmp/dimgithub-build`. Compare the generated worker to the candidate before uploading. Deploy code-only with `wrangler versions upload --config ops/dimgithub/wrangler.jsonc`, then `wrangler versions deploy <version-id>@100% --config ops/dimgithub/wrangler.jsonc -y`; that path leaves custom domains, cron and secrets alone, so it does not hit the domain-sync permission error described below. The upload must list no additional modules: `find_additional_modules` is off because wrangler otherwise attaches any `.txt`, `.html` or `.bin` file under this directory. Avoid deploying the older Lakebed implementation over the live Cloudflare application.
 
 Upload succeeded, but Wrangler's domain-sync step lacked zone-route permission. The existing budget-checked resume procedure separately restored all 20 custom domains. The minute-by-minute cron remained unchanged. Exact deployed-code and binding readbacks confirmed the candidate and preserved secrets.
 
@@ -25,3 +25,4 @@ The pages are rebuilt inside `worker.candidate.mjs`; there is no separate source
 - The content security policy allows no external fonts, styles or scripts and only same-origin images, so the design uses system fonts, CSS gradients and inline SVG. `/favicon.svg` is a new route for the tab icon.
 - The analytics bootstrap (`Q`) escapes `<` in its JSON argument. The recovered bundle wrote the raw `?theme=` value into an inline script, which let a crafted link close the script element and run its own.
 
+The redesign was deployed as version ee66190a-58e4-46aa-90c4-56538a9c8cc2 on 2026-11-13 at 01:01 UTC, replacing 7212be64-8692-4799-b55f-25c3813eb889, which is the version to roll back to.
