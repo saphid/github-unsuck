@@ -1,0 +1,116 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dimgithub",
+  "main": "worker.candidate.mjs",
+  "account_id": "9803821a7c6a638a2e69b8ffe8286cb5",
+  "compatibility_date": "2026-11-08",
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "catppuccin-latte.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "catppuccin-mocha.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "dark.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "dracula.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "hotdog.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "light.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "nord.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "one-dark-pro.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "solarize.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "solarized.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "solarized-dark.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "solarized-light.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "t3-chat-dark.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "t3-chat-light.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "t3-code-dark.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "t3-code-light.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "vscode-dark.dimgithub.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "vscode-light.dimgithub.com",
+      "custom_domain": true
+    }
+  ],
+  "preview_urls": false,
+  "limits": {
+    "cpu_ms": 10
+  },
+  "observability": {
+    "enabled": false
+  },
+  "triggers": {
+    "crons": [
+      "* * * * *"
+    ]
+  },
+  "vars": {
+    "BUDGET_START_AT": "2026-11-10T23:39:20.437756Z"
+  },
+  "no_bundle": true,
+  "ratelimits": [
+    {
+      "name": "ANALYTICS_BURST",
+      "namespace_id": "343535",
+      "simple": {
+        "limit": 30,
+        "period": 60
+      }
+    }
+  ]
+}
