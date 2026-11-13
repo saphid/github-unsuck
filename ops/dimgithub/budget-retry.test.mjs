@@ -91,13 +91,17 @@ test('slow usage calls retry within the overall timeout', async () => {
   assert.equal(calls, 2);
 });
 
-for (const path of ['/', '/make', '/api/health', '/stats', '/themes']) {
-  test(`the hotfix preserves the live ${path} response`, async () => {
+// The redesign changed page markup only. Status and headers stay as deployed on every
+// route, and non-page responses stay byte for byte identical to the recovered bundle.
+const redesignedPages = new Set(['/', '/make', '/themes']);
+for (const path of ['/', '/make', '/themes', '/api/health', '/stats', '/robots.txt', '/card.svg?service=npm&theme=nord&title=Card&description=Text&path=npmjs.com']) {
+  test(`the candidate preserves the live ${path} response`, async () => {
     const request = new Request('https://dimgithub.com' + path);
     const before = await original.fetch(request, {}, {});
     const after = await candidate.fetch(request, {}, {});
     assert.equal(after.status, before.status);
     assert.deepEqual([...after.headers], [...before.headers]);
-    assert.equal(await after.text(), await before.text());
+    const [beforeBody, afterBody] = [await before.text(), await after.text()];
+    if (!redesignedPages.has(path)) assert.equal(afterBody, beforeBody);
   });
 }
