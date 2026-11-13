@@ -25,4 +25,4 @@ The pages are rebuilt inside `worker.candidate.mjs`; there is no separate source
 - The content security policy allows no external fonts, styles or scripts and only same-origin images, so the design uses system fonts, CSS gradients and inline SVG. `/favicon.svg` is a new route for the tab icon.
 - The analytics bootstrap (`Q`) escapes `<` in its JSON argument. The recovered bundle wrote the raw `?theme=` value into an inline script, which let a crafted link close the script element and run its own.
 
-The redesign was deployed as version ee66190a-58e4-46aa-90c4-56538a9c8cc2 on 2026-11-13 at 01:01 UTC, replacing 7212be64-8692-4799-b55f-25c3813eb889, which is the version to roll back to.
+The redesign was deployed as version ee66190a-58e4-46aa-90c4-56538a9c8cc2 on 2026-11-13 at 01:01 UTC, replacing 7212be64-8692-4799-b55f-25c3813eb889 (the last pre-redesign version). The dark-only pages and labelled theme chips followed as dcfe560e-6b98-4429-8065-7846bd7631a2 at 01:34 UTC; roll back to ee66190a for the first redesign or 7212be64 for the old pages.
