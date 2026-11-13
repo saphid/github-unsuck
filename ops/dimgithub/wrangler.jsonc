@@ -4,6 +4,7 @@
   "main": "worker.candidate.mjs",
   "account_id": "9803821a7c6a638a2e69b8ffe8286cb5",
   "compatibility_date": "2026-11-08",
+  "compatibility_flags": ["global_fetch_strictly_public", "disallow_importable_env", "disallow_eval_during_startup"],
   "workers_dev": false,
   "routes": [
     {
@@ -94,26 +95,12 @@
   "observability": {
     "enabled": false
   },
+  // Public-only: no cron, vars, secrets or bindings of any kind. The worker ignores its env.
   "triggers": {
-    "crons": [
-      "* * * * *"
-    ]
-  },
-  "vars": {
-    "BUDGET_START_AT": "2026-11-10T23:39:20.437756Z"
+    "crons": []
   },
   "no_bundle": true,
   // Upload the bundle alone. Without this, wrangler attaches any .txt, .html or .bin
   // file it finds beside it, such as responder evidence.
-  "find_additional_modules": false,
-  "ratelimits": [
-    {
-      "name": "ANALYTICS_BURST",
-      "namespace_id": "343535",
-      "simple": {
-        "limit": 30,
-        "period": 60
-      }
-    }
-  ]
+  "find_additional_modules": false
 }

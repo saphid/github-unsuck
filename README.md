@@ -1,5 +1,7 @@
 # Links / Unsuck
 
+The **dimgithub.com production Worker** is documented in [ops/dimgithub](ops/dimgithub/README.md). It runs in public-GitHub-only mode, with no credentials, runtime bindings, analytics or scheduled management jobs. The Lakebed implementation described below is a separate, older deployment.
+
 Themed link previews for GitHub, YouTube, GitLab, npm, PyPI, and English Wikipedia.
 Crawlers get server-rendered Open Graph metadata and a PNG in your chosen theme;
 people opening a shared link continue to the original page with JavaScript.
