@@ -1,0 +1,114 @@
+{
+ "incidents": {
+  "SIM-20261113T005653Z": {
+   "actions": [],
+   "class": "dns-missing",
+   "confirmed_at": "2026-11-13T00:56:53Z",
+   "escalations": [
+    {
+     "at": "2026-11-13T00:57:35Z",
+     "reason": "Worker spend has reached the $4 cap; site is down by design until the next month or until Alex changes the cap."
+    }
+   ],
+   "first_failure_at": "2026-11-13T00:56:43Z",
+   "id": "SIM-20261113T005653Z",
+   "kind": "outage",
+   "last_reminder": "2026-11-13T00:57:35Z",
+   "opened_at": "2026-11-13T00:56:53Z",
+   "pause_clears": 0,
+   "restores": 0,
+   "runs": [
+    {
+     "finished_at": "2026-11-13T00:56:54Z",
+     "launched_at": "2026-11-13T00:56:54Z",
+     "outcome": "launch failed: Failed to start transient service unit: Unit dimgithub-responder-sim-20261113t005653z-r1.service was already loaded or has a fragment file.",
+     "reason": "initial",
+     "run": 1,
+     "unit": "dimgithub-responder-sim-20261113t005653z-r1"
+    },
+    {
+     "attempts": [
+      {
+       "cost_usd": 0.241011,
+       "error": null,
+       "exit": 0,
+       "models": [
+        "claude-opus-5-5"
+       ],
+       "ok": true,
+       "route": "claude-proxy",
+       "seconds": 26,
+       "turns": 3
+      }
+     ],
+     "branch": "A2-cap-reached",
+     "finished_at": "2026-11-13T00:57:53Z",
+     "launched_at": "2026-11-13T00:57:23Z",
+     "outcome": "escalated",
+     "reason": "still dns-missing after previous responder run",
+     "run": 2,
+     "started_at": "2026-11-13T00:57:24Z",
+     "summary": "Worker spend has reached the $4 cap ($4.05 from 8.1M requests since 2026-11-10T23:39Z), so the budget watchdog deleted all 20 dimgithub.com custom-domain bindings; analytics is also at the cap and its pause is correct. This is the guardrail working, not a failure, so nothing was restored or cleared and the site stays down until next month or until you change the cap.",
+     "unit": "dimgithub-responder-sim-20261113t005653z-r2",
+     "verify": {
+      "class": "dns-missing",
+      "cloudflare": {
+       "budget": {
+        "analytics_cap_usd": 4,
+        "analytics_fraction": 1.0125,
+        "analytics_spend_usd": 4.05,
+        "pauseAnalytics": true,
+        "since": "2026-11-10T23:39:20Z",
+        "stopSite": true,
+        "worker_cap_usd": 4,
+        "worker_fraction": 1.0125,
+        "worker_spend_usd": 4.05
+       },
+       "domains_expected": 20,
+       "domains_missing": [
+        "catppuccin-latte.dimgithub.com",
+        "catppuccin-mocha.dimgithub.com",
+        "dark.dimgithub.com",
+        "dimgithub.com",
+        "dracula.dimgithub.com",
+        "hotdog.dimgithub.com",
+        "light.dimgithub.com",
+        "nord.dimgithub.com",
+        "one-dark-pro.dimgithub.com",
+        "solarize.dimgithub.com",
+        "solarized-dark.dimgithub.com",
+        "solarized-light.dimgithub.com",
+        "solarized.dimgithub.com",
+        "t3-chat-dark.dimgithub.com",
+        "t3-chat-light.dimgithub.com",
+        "t3-code-dark.dimgithub.com",
+        "t3-code-light.dimgithub.com",
+        "vscode-dark.dimgithub.com",
+        "vscode-light.dimgithub.com",
+        "www.dimgithub.com"
+       ],
+       "domains_present": 0,
+       "pause_secret_present": true,
+       "zone_status": "active"
+      },
+      "probe": "dns-missing | dimgithub.com: auth-dns empty, http skipped, local-dns ok; t3-code-dark.dimgithub.com: auth-dns empty, http skipped, local-dns ok"
+     }
+    }
+   ],
+   "scenario": "cap-reached",
+   "sim": true,
+   "status": "escalated"
+  }
+ },
+ "agent_results": {
+  "SIM-20261113T005653Z/agent-r2-claude-proxy.json": {
+   "result": "I followed branch A2: the budget watchdog took the site down because worker spend really did reach the cap. I escalated to Alex and made no changes.\n\nWhat `diagnose` showed now:\n- **Budget:** the usage read worked. Worker spend is $4.05 against the $4 cap (8.1M requests since 2026-11-10T23:39:20Z), so `stopSite` is true. Analytics spend is also $4.05, so `pauseAnalytics` is true.\n- **Domains:** all 20 custom-domain bindings are missing. The authoritative nameservers return NXDOMAIN for both probed hostnames.\n- **Pause secret:** `POSTHOG_PAUSED_MONTH` is set, which is correct at the analytics cap.\n- **Zone and control:** the zone is active, its nameservers match the probe config, and the control URL returns 200. The Worker logged 0 errors in the last 15 minutes.\n- **Public DNS:** public resolvers and lxso1's local resolver still return addresses. These are probably cached answers; the authoritative servers are what count.\n\nBecause this is the guardrail working, I did not run `restore-domains` or `clear-pause`. Branch B2 also applies, and it calls for no action. The escalation went through.\n\nRESULT {\"branch\": \"A2-cap-reached\", \"outcome\": \"escalated\", \"summary\": \"Worker spend has reached the $4 cap ($4.05 from 8.1M requests since 2026-11-10T23:39Z), so the budget watchdog deleted all 20 dimgithub.com custom-domain bindings; analytics is also at the cap and its pause is correct. This is the guardrail working, not a failure, so nothing was restored or cleared and the site stays down until next month or until you change the cap.\"}",
+   "models": [
+    "claude-opus-5-5"
+   ],
+   "turns": 3,
+   "cost_usd": 0.241011,
+   "permission_denials": []
+  }
+ }
+}

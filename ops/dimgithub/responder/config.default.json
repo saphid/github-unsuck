@@ -1,0 +1,92 @@
+{
+  "account_id": "9803821a7c6a638a2e69b8ffe8286cb5",
+  "worker": "dimgithub",
+  "zone": "dimgithub.com",
+  "wrangler_config": "",
+  "probe": {
+    "hosts": [
+      "dimgithub.com",
+      "t3-code-dark.dimgithub.com"
+    ],
+    "health_path": "/api/health",
+    "authoritative_ns": [
+      "ben.ns.cloudflare.com",
+      "mary.ns.cloudflare.com"
+    ],
+    "control_url": "https://www.cloudflare.com/cdn-cgi/trace",
+    "dns_timeout_s": 2,
+    "http_timeout_s": 8,
+    "authoritative_ns_ips": {
+      "ben.ns.cloudflare.com": [
+        "172.64.33.103",
+        "108.162.193.103",
+        "173.245.59.103"
+      ],
+      "mary.ns.cloudflare.com": [
+        "173.245.58.134",
+        "108.162.192.134",
+        "172.64.32.134"
+      ]
+    }
+  },
+  "monitor": {
+    "interval_s": 30,
+    "fast_retry_s": 10,
+    "confirm_failures": 2,
+    "deep_check_interval_s": 600,
+    "close_after_healthy_s": 600,
+    "vantage_alert_after_s": 1800,
+    "escalated_reminder_s": 43200,
+    "budget_warning_fraction": 0.75
+  },
+  "limits": {
+    "responder_runs_per_incident": 1,
+    "restores_per_incident": 2,
+    "restores_per_24h": 3,
+    "pause_clears_per_incident": 1,
+    "watch_max_s": 300
+  },
+  "budget": {
+    "worker_dollars_per_request": 5e-07,
+    "posthog_dollars_per_subrequest": 5e-05,
+    "worker_cutoff_dollars": 4,
+    "analytics_cutoff_dollars": 4
+  },
+  "credentials": {
+    "cloudflare_token_ref": "op://ev2ed5dafg7ofw3hizx5qowmgq/ztz3g2qlui7ogo3lebkpbqygxu/credential",
+    "op_agent": "/usr/local/bin/op-agent"
+  },
+  "agent": {
+    "launcher": "systemd",
+    "timeout_s": 1800,
+    "model": "claude-opus-5-5",
+    "routes": [
+      {
+        "name": "claude-proxy",
+        "argv": [
+          "/usr/local/bin/claude-proxy",
+          "claude-opus-5-5"
+        ]
+      },
+      {
+        "name": "claude-direct",
+        "argv": [
+          "/usr/local/bin/claude",
+          "--model",
+          "claude-opus-5-5"
+        ]
+      }
+    ]
+  },
+  "notify": {
+    "channels": [
+      "hermes_discord",
+      "github_issue"
+    ],
+    "hermes_script": "/srv/services/llmsecondbrain-wiki/current/deploy/lxso1/bin/hermes-notify.py",
+    "hermes_target": "discord",
+    "github_repo": "saphid/github-unsuck",
+    "github_issue": 0,
+    "file_path": ""
+  }
+}

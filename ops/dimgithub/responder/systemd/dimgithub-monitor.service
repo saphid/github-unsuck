@@ -1,0 +1,21 @@
+[Unit]
+Description=dimgithub.com outage monitor and responder launcher (saphid/github-unsuck ops/dimgithub/responder)
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %h/.local/lib/dimgithub-responder/monitor.py run
+Restart=always
+RestartSec=15
+Environment=PYTHONUNBUFFERED=1
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin
+WorkingDirectory=%h/.local/state/dimgithub-responder
+StandardOutput=journal
+StandardError=journal
+LogRateLimitIntervalSec=10min
+LogRateLimitBurst=200
+
+[Install]
+WantedBy=default.target

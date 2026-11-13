@@ -1,0 +1,26 @@
+## 2026-11-13T01:12:12Z systemctl
+enabled
+active
+Linger=yes
+## journal (last 4 probes)
+Nov 13 01:10:21 lxso1 python3[1711152]: {"at": "2026-11-13T01:10:21Z", "class": "healthy", "failures": 0, "open": null, "summary": "healthy | dimgithub.com: auth-dns answer, http 200, local-dns ok; t3-code-dark.dimgithub.com: auth-dns answer, http 200, local-dns ok"}
+Nov 13 01:10:51 lxso1 python3[1711152]: {"at": "2026-11-13T01:10:51Z", "class": "healthy", "failures": 0, "open": null, "summary": "healthy | dimgithub.com: auth-dns answer, http 200, local-dns ok; t3-code-dark.dimgithub.com: auth-dns answer, http 200, local-dns ok"}
+Nov 13 01:11:21 lxso1 python3[1711152]: {"at": "2026-11-13T01:11:21Z", "class": "healthy", "failures": 0, "open": null, "summary": "healthy | dimgithub.com: auth-dns answer, http 200, local-dns ok; t3-code-dark.dimgithub.com: auth-dns answer, http 200, local-dns ok"}
+Nov 13 01:11:51 lxso1 python3[1711152]: {"at": "2026-11-13T01:11:51Z", "class": "healthy", "failures": 0, "open": null, "summary": "healthy | dimgithub.com: auth-dns answer, http 200, local-dns ok; t3-code-dark.dimgithub.com: auth-dns answer, http 200, local-dns ok"}
+## status
+{
+ "heartbeat": "2026-11-13T01:11:51Z",
+ "heartbeat_age_s": 22.151957,
+ "last_class": "healthy",
+ "last_summary": "healthy | dimgithub.com: auth-dns answer, http 200, local-dns ok; t3-code-dark.dimgithub.com: auth-dns answer, http 200, local-dns ok",
+ "consecutive_failures": 0,
+ "paused_until": null,
+ "last_deep": "2026-11-13T01:11:24Z",
+ "last_deep_anomalies": [],
+ "monitor_running": true,
+ "responder_running": false,
+ "open_incident": null,
+ "outbox": 0,
+ "recent_incidents": []
+}
+  dimgithub-monitor.service loaded active running dimgithub.com outage monitor and responder launcher (saphid/github-unsuck ops/dimgithub/responder)

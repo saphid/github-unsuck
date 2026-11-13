@@ -1,0 +1,6 @@
+{
+  "name": "local-dns-only",
+  "description": "This vantage's own resolver cannot resolve dimgithub.com (stale negative cache), but the authoritative path is healthy. Must not open an incident.",
+  "probe": {"local_dns_fail": ["dimgithub.com", "t3-code-dark.dimgithub.com"]},
+  "heal_on_write": false
+}
